@@ -1,36 +1,96 @@
-# # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Root .gitignore for monorepo
 
-# # dependencies
-# /node_modules
-# /.pnp
-# .pnp.js
-# .yarn/install-state.gz
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
 
-# # testing
-# /coverage
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# # next.js
-# /.next/
-# /out/
+# Build outputs
+dist/
+build/
+.next/
+out/
 
-# # production
-# /build
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# # misc
-# .DS_Store
-# *.pem
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# # debug
-# npm-debug.log*
-# yarn-debug.log*
-# yarn-error.log*
+# Logs
+*.log
+logs
 
-# # local env files
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
 
-# # vercel
-# .vercel
+# Dependency directories
+.pnp
+.pnp.js
 
-# # typescript
-# *.tsbuildinfo
-# next-env.d.ts
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env.test
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Temporary folders
+tmp/
+temp/
+
+# Docker
+.dockerignore
+
+pickone-client/node_modules
+pickone-admin/node_modules
+pickone-server/node_modules
+
+pickone-client/.next
+pickone-admin/.next
+pickone-server/dist

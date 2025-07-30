@@ -1,23 +1,23 @@
-export const dynamic = 'force-dynamic';
-import { FC } from 'react';
-import ProductCarousel from '@/components/reusable/ProductCarousel';
-import HeroSection from '@/components/pages-components/HeroSection';
-import PromotionBanner from '@/components/pages-components/PromotionBanner';
-import FeatureSection from '@/components/pages-components/FeatureSection';
-import { Suspense } from 'react';
-import HomePageClient from '@/components/client/HomePageClient';
-import { config } from '@/config/env';
+export const dynamic = "force-dynamic";
+import {FC} from "react";
+import ProductCarousel from "@/components/reusable/ProductCarousel";
+import HeroSection from "@/components/pages-components/HeroSection";
+import PromotionBanner from "@/components/pages-components/PromotionBanner";
+import FeatureSection from "@/components/pages-components/FeatureSection";
+import {Suspense} from "react";
+import HomePageClient from "@/components/client/HomePageClient";
+import {config} from "@/config/env";
 
 const fetchProducts = async () => {
     try {
         const [productsResponse, bestSalesResponse] = await Promise.all([
             fetch(`${config.BASE_URL}/api/v1/product/list?limit=20&page=1`, {
-                next: { revalidate: 0 }, // Revalidate every minute
-                cache: 'no-store', // Disable caching completely
+                next: {revalidate: 0}, // Revalidate every minute
+                cache: "no-store", // Disable caching completely
             }),
             fetch(`${config.BASE_URL}/api/v1/product/best-sales`, {
-                next: { revalidate: 0 }, // Revalidate every minute
-                cache: 'no-store', // Disable caching completely
+                next: {revalidate: 0}, // Revalidate every minute
+                cache: "no-store", // Disable caching completely
             }),
         ]);
 
@@ -30,18 +30,18 @@ const fetchProducts = async () => {
             error: null,
         };
     } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error("Error fetching products:", error);
         return {
             products: [],
             bestSales: [],
-            error: 'Failed to load products. Using fallback data.',
+            error: "Failed to load products. Using fallback data.",
         };
     }
 };
 
 // The main component is a server component that fetches data
 const Home: FC = async () => {
-    const { products, bestSales, error } = await fetchProducts();
+    const {products, bestSales, error} = await fetchProducts();
 
     // We wrap the page content in a Suspense boundary with our client component
     // that safely handles search params
@@ -68,7 +68,9 @@ const Home: FC = async () => {
                                     </svg>
                                 </div>
                                 <div className="ml-3">
-                                    <p className="text-sm text-yellow-700">{error}</p>
+                                    <p className="text-sm text-yellow-700">
+                                        {error}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -76,10 +78,18 @@ const Home: FC = async () => {
 
                     <div className="space-y-2">
                         {products.length > 0 ? (
-                            <ProductCarousel products={products} title="New Arrivals" showSeeAllButton />
+                            <ProductCarousel
+                                products={products}
+                                title="New Arrivals"
+                                showSeeAllButton
+                            />
                         ) : null}
                         {bestSales.length > 0 ? (
-                            <ProductCarousel products={bestSales} title="Best Sales" showSeeAllButton />
+                            <ProductCarousel
+                                products={bestSales}
+                                title="Best Sales"
+                                showSeeAllButton
+                            />
                         ) : null}
                     </div>
 

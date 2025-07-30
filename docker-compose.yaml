@@ -27,6 +27,7 @@ services:
       - ./pickone-server:/app
       - /app/node_modules
       - /app/dist
+      - static-flles:/tmp
     env_file:
       - .env
     networks:

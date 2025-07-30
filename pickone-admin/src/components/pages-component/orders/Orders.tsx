@@ -1,6 +1,6 @@
 // app/(dashboard)/order/page.tsx
-'use client';
-import React, { useState, useEffect, useMemo } from 'react';
+"use client";
+import React, {useState, useEffect, useMemo} from "react";
 import {
     FiSearch,
     FiShoppingCart,
@@ -8,36 +8,39 @@ import {
     FiClock,
     FiCheckCircle,
     FiDollarSign,
-    FiGrid,
-    FiList,
-    FiDownload,
     FiRefreshCw,
     FiTrendingUp,
-} from 'react-icons/fi';
-import Loader from '@/components/reusable/Loader/Loader';
+} from "react-icons/fi";
+import Loader from "@/components/reusable/Loader/Loader";
 import {
     useGetOrdersQuery,
     useApproveOrderMutation,
     useCompleteOrderMutation,
     useCancelOrderMutation,
     useDeleteOrderMutation,
-} from '@/redux/api/orderApi';
-import NotFound from '@/components/shared/NotFound';
-import Pagination from '@/components/shared/Pagination';
-import OrderTable from './components/OrderTable';
-import ConfirmationModal from './components/ConfirmationModal';
-import OrderDetailsModal from './components/OrderDetailsModal';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
+} from "@/redux/api/orderApi";
+import NotFound from "@/components/shared/NotFound";
+import Pagination from "@/components/shared/Pagination";
+import OrderTable from "./components/OrderTable";
+import ConfirmationModal from "./components/ConfirmationModal";
+import OrderDetailsModal from "./components/OrderDetailsModal";
+import {Button} from "@/components/ui/button";
+import {Badge} from "@/components/ui/badge";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {Card, CardContent} from "@/components/ui/card";
 
 const Order = () => {
-    const [searchTerm, setSearchTerm] = useState<string>('');
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
-    const [statusFilter, setStatusFilter] = useState<string>('all');
-    const [dateFilter, setDateFilter] = useState<string>('all');
-    const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+    const [searchTerm, setSearchTerm] = useState<string>("");
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
+    const [statusFilter, setStatusFilter] = useState<string>("all");
+    const [dateFilter, setDateFilter] = useState<string>("all");
+    // const [viewMode, setViewMode] = useState<"grid" | "table">("table");
 
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -54,7 +57,7 @@ const Order = () => {
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [confirmAction, setConfirmAction] = useState<{
-        type: 'approve' | 'complete' | 'cancel' | 'delete';
+        type: "approve" | "complete" | "cancel" | "delete";
         orderId: string;
         title: string;
         description: string;
@@ -73,15 +76,20 @@ const Order = () => {
 
     // Construct query parameters
     let queries = `page=${currentPage}&limit=${itemsPerPage}`;
-    if (statusFilter !== 'all') queries += `&status=${statusFilter}`;
+    if (statusFilter !== "all") queries += `&status=${statusFilter}`;
     if (debouncedSearchTerm) queries += `&search=${debouncedSearchTerm}`;
 
     // Fetch orders with all data for statistics
-    const { data: orders, isLoading, isFetching, refetch } = useGetOrdersQuery({ query: queries });
+    const {
+        data: orders,
+        isLoading,
+        isFetching,
+        refetch,
+    } = useGetOrdersQuery({query: queries});
 
     // Fetch all orders for statistics (without pagination)
-    const { data: allOrdersData } = useGetOrdersQuery({
-        query: 'limit=1000', // Get all orders for stats
+    const {data: allOrdersData} = useGetOrdersQuery({
+        query: "limit=1000", // Get all orders for stats
     });
 
     // Calculate statistics
@@ -89,11 +97,22 @@ const Order = () => {
         const allOrders = allOrdersData?.data || [];
 
         const totalOrders = allOrders.length;
-        const totalRevenue = allOrders.reduce((sum: number, order: any) => sum + (order?.total_price || 0), 0);
-        const pendingOrders = allOrders.filter((order: any) => order?.status === 'pending').length;
-        const processingOrders = allOrders.filter((order: any) => order?.status === 'processing').length;
-        const completedOrders = allOrders.filter((order: any) => order?.status === 'completed').length;
-        const cancelledOrders = allOrders.filter((order: any) => order?.status === 'cancelled').length;
+        const totalRevenue = allOrders.reduce(
+            (sum: number, order: any) => sum + (order?.total_price || 0),
+            0
+        );
+        const pendingOrders = allOrders.filter(
+            (order: any) => order?.status === "pending"
+        ).length;
+        const processingOrders = allOrders.filter(
+            (order: any) => order?.status === "processing"
+        ).length;
+        const completedOrders = allOrders.filter(
+            (order: any) => order?.status === "completed"
+        ).length;
+        const cancelledOrders = allOrders.filter(
+            (order: any) => order?.status === "cancelled"
+        ).length;
 
         // Calculate average order value
         const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
@@ -121,36 +140,41 @@ const Order = () => {
         setCurrentPage(1);
     }, [itemsPerPage, debouncedSearchTerm, statusFilter, dateFilter]);
 
-    const handleAction = (type: 'approve' | 'complete' | 'cancel' | 'delete' | 'view', order: any) => {
-        if (type === 'view') {
+    const handleAction = (
+        type: "approve" | "complete" | "cancel" | "delete" | "view",
+        order: any
+    ) => {
+        if (type === "view") {
             setCurrentOrder(order);
             setIsViewModalOpen(true);
             return;
         }
 
-        let title = '';
-        let description = '';
+        let title = "";
+        let description = "";
 
         switch (type) {
-            case 'approve':
-                title = 'Approve Order';
-                description = 'Are you sure you want to approve this order?';
+            case "approve":
+                title = "Approve Order";
+                description = "Are you sure you want to approve this order?";
                 break;
-            case 'complete':
-                title = 'Complete Order';
-                description = 'Are you sure you want to mark this order as completed?';
+            case "complete":
+                title = "Complete Order";
+                description =
+                    "Are you sure you want to mark this order as completed?";
                 break;
-            case 'cancel':
-                title = 'Cancel Order';
-                description = 'Are you sure you want to cancel this order?';
+            case "cancel":
+                title = "Cancel Order";
+                description = "Are you sure you want to cancel this order?";
                 break;
-            case 'delete':
-                title = 'Delete Order';
-                description = 'Are you sure you want to delete this order? This action cannot be undone.';
+            case "delete":
+                title = "Delete Order";
+                description =
+                    "Are you sure you want to delete this order? This action cannot be undone.";
                 break;
         }
 
-        setConfirmAction({ type, orderId: order._id, title, description });
+        setConfirmAction({type, orderId: order._id, title, description});
         setIsConfirmModalOpen(true);
     };
 
@@ -159,23 +183,23 @@ const Order = () => {
 
         try {
             switch (confirmAction.type) {
-                case 'approve':
+                case "approve":
                     await approveOrder(confirmAction.orderId).unwrap();
                     break;
-                case 'complete':
+                case "complete":
                     await completeOrder(confirmAction.orderId).unwrap();
                     break;
-                case 'cancel':
+                case "cancel":
                     await cancelOrder(confirmAction.orderId).unwrap();
                     break;
-                case 'delete':
+                case "delete":
                     await deleteOrder(confirmAction.orderId).unwrap();
                     break;
             }
             setIsConfirmModalOpen(false);
             setConfirmAction(null);
         } catch (error) {
-            console.error('Action failed:', error);
+            console.error("Action failed:", error);
         }
     };
 
@@ -191,17 +215,27 @@ const Order = () => {
                             </div>
                             Order Management
                         </h1>
-                        <p className="text-gray-600 mt-2">Manage customer orders, track status, and process fulfillment</p>
+                        <p className="text-gray-600 mt-2">
+                            Manage customer orders, track status, and process
+                            fulfillment
+                        </p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Button variant="outline" size="sm" onClick={() => refetch()} className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => refetch()}
+                            className="flex items-center gap-2">
                             <FiRefreshCw className="w-4 h-4" />
                             Refresh
                         </Button>
-                        <Button variant="outline" size="sm" className="flex items-center gap-2">
+                        {/* <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-2">
                             <FiDownload className="w-4 h-4" />
                             Export
-                        </Button>
+                        </Button> */}
                     </div>
                 </div>
             </div>
@@ -212,9 +246,15 @@ const Order = () => {
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                                <p className="text-2xl font-bold text-gray-900">{orderStats.totalOrders}</p>
-                                <p className="text-xs text-gray-500 mt-1">All time</p>
+                                <p className="text-sm font-medium text-gray-600">
+                                    Total Orders
+                                </p>
+                                <p className="text-2xl font-bold text-gray-900">
+                                    {orderStats.totalOrders}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    All time
+                                </p>
                             </div>
                             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                                 <FiShoppingCart className="w-6 h-6 text-blue-600" />
@@ -227,7 +267,9 @@ const Order = () => {
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                                <p className="text-sm font-medium text-gray-600">
+                                    Total Revenue
+                                </p>
                                 <p className="text-2xl font-bold text-gray-900">
                                     ৳{orderStats.totalRevenue.toLocaleString()}
                                 </p>
@@ -247,9 +289,15 @@ const Order = () => {
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-600">Pending Orders</p>
-                                <p className="text-2xl font-bold text-gray-900">{orderStats.pendingOrders}</p>
-                                <p className="text-xs text-orange-600 mt-1">Awaiting approval</p>
+                                <p className="text-sm font-medium text-gray-600">
+                                    Pending Orders
+                                </p>
+                                <p className="text-2xl font-bold text-gray-900">
+                                    {orderStats.pendingOrders}
+                                </p>
+                                <p className="text-xs text-orange-600 mt-1">
+                                    Awaiting approval
+                                </p>
                             </div>
                             <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
                                 <FiClock className="w-6 h-6 text-orange-600" />
@@ -262,9 +310,15 @@ const Order = () => {
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-600">Completed Orders</p>
-                                <p className="text-2xl font-bold text-gray-900">{orderStats.completedOrders}</p>
-                                <p className="text-xs text-green-600 mt-1">Successfully delivered</p>
+                                <p className="text-sm font-medium text-gray-600">
+                                    Completed Orders
+                                </p>
+                                <p className="text-2xl font-bold text-gray-900">
+                                    {orderStats.completedOrders}
+                                </p>
+                                <p className="text-xs text-green-600 mt-1">
+                                    Successfully delivered
+                                </p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                                 <FiCheckCircle className="w-6 h-6 text-green-600" />
@@ -278,7 +332,7 @@ const Order = () => {
             <Card className="bg-white border-0 shadow-lg mb-8">
                 <CardContent className="p-6">
                     <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-                        <div className="flex flex-col sm:flex-row gap-4 flex-1">
+                        <div className="flex flex-col lg:justify-between sm:flex-row gap-4 flex-1">
                             {/* Search */}
                             <div className="relative w-full max-w-md">
                                 <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -287,86 +341,132 @@ const Order = () => {
                                     placeholder="Search by order ID, customer name, phone..."
                                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(e) =>
+                                        setSearchTerm(e.target.value)
+                                    }
                                 />
                             </div>
 
                             {/* Status Filter */}
-                            <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                <SelectTrigger className="w-40">
+                            <Select
+                                value={statusFilter}
+                                onValueChange={setStatusFilter}>
+                                <SelectTrigger className="w-40 h-10">
                                     <SelectValue placeholder="Status" />
                                 </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Status</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="processing">Processing</SelectItem>
-                                    <SelectItem value="completed">Completed</SelectItem>
-                                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                                <SelectContent className="bg-white">
+                                    <SelectItem value="all">
+                                        All Status
+                                    </SelectItem>
+                                    <SelectItem value="pending">
+                                        Pending
+                                    </SelectItem>
+                                    <SelectItem value="processing">
+                                        Processing
+                                    </SelectItem>
+                                    <SelectItem value="completed">
+                                        Completed
+                                    </SelectItem>
+                                    <SelectItem value="cancelled">
+                                        Cancelled
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
 
                             {/* Date Filter */}
-                            <Select value={dateFilter} onValueChange={setDateFilter}>
-                                <SelectTrigger className="w-40">
+                            {/* <Select
+                                value={dateFilter}
+                                onValueChange={setDateFilter}>
+                                <SelectTrigger className="w-40 h-10">
                                     <SelectValue placeholder="Date" />
                                 </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Time</SelectItem>
+                                <SelectContent className="bg-white">
+                                    <SelectItem value="all">
+                                        All Time
+                                    </SelectItem>
                                     <SelectItem value="today">Today</SelectItem>
-                                    <SelectItem value="week">This Week</SelectItem>
-                                    <SelectItem value="month">This Month</SelectItem>
+                                    <SelectItem value="week">
+                                        This Week
+                                    </SelectItem>
+                                    <SelectItem value="month">
+                                        This Month
+                                    </SelectItem>
                                 </SelectContent>
-                            </Select>
+                            </Select> */}
                         </div>
 
                         {/* View Mode Toggle */}
-                        <div className="flex items-center gap-2">
+                        {/* <div className="flex items-center gap-2">
                             <span className="text-sm text-gray-600">View:</span>
                             <div className="flex items-center bg-gray-100 rounded-lg p-1">
                                 <Button
-                                    variant={viewMode === 'table' ? 'default' : 'ghost'}
+                                    variant={
+                                        viewMode === "table"
+                                            ? "default"
+                                            : "ghost"
+                                    }
                                     size="sm"
-                                    onClick={() => setViewMode('table')}
+                                    onClick={() => setViewMode("table")}
                                     className="flex items-center gap-1">
                                     <FiList className="w-4 h-4" />
                                     Table
                                 </Button>
                                 <Button
-                                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                                    variant={
+                                        viewMode === "grid"
+                                            ? "default"
+                                            : "ghost"
+                                    }
                                     size="sm"
-                                    onClick={() => setViewMode('grid')}
+                                    onClick={() => setViewMode("grid")}
                                     className="flex items-center gap-1">
                                     <FiGrid className="w-4 h-4" />
                                     Grid
                                 </Button>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
 
                     {/* Active Filters */}
-                    {(statusFilter !== 'all' || dateFilter !== 'all' || debouncedSearchTerm) && (
+                    {(statusFilter !== "all" ||
+                        dateFilter !== "all" ||
+                        debouncedSearchTerm) && (
                         <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t">
-                            <span className="text-sm text-gray-600">Active filters:</span>
-                            {statusFilter !== 'all' && (
-                                <Badge variant="secondary" className="flex items-center gap-1">
+                            <span className="text-sm text-gray-600">
+                                Active filters:
+                            </span>
+                            {statusFilter !== "all" && (
+                                <Badge
+                                    variant="secondary"
+                                    className="flex items-center gap-1">
                                     Status: {statusFilter}
-                                    <button onClick={() => setStatusFilter('all')} className="ml-1 hover:text-red-600">
+                                    <button
+                                        onClick={() => setStatusFilter("all")}
+                                        className="ml-1 hover:text-red-600">
                                         ×
                                     </button>
                                 </Badge>
                             )}
-                            {dateFilter !== 'all' && (
-                                <Badge variant="secondary" className="flex items-center gap-1">
+                            {dateFilter !== "all" && (
+                                <Badge
+                                    variant="secondary"
+                                    className="flex items-center gap-1">
                                     Date: {dateFilter}
-                                    <button onClick={() => setDateFilter('all')} className="ml-1 hover:text-red-600">
+                                    <button
+                                        onClick={() => setDateFilter("all")}
+                                        className="ml-1 hover:text-red-600">
                                         ×
                                     </button>
                                 </Badge>
                             )}
                             {debouncedSearchTerm && (
-                                <Badge variant="secondary" className="flex items-center gap-1">
+                                <Badge
+                                    variant="secondary"
+                                    className="flex items-center gap-1">
                                     Search: &ldquo;{debouncedSearchTerm}&rdquo;
-                                    <button onClick={() => setSearchTerm('')} className="ml-1 hover:text-red-600">
+                                    <button
+                                        onClick={() => setSearchTerm("")}
+                                        className="ml-1 hover:text-red-600">
                                         ×
                                     </button>
                                 </Badge>
@@ -375,9 +475,9 @@ const Order = () => {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => {
-                                    setStatusFilter('all');
-                                    setDateFilter('all');
-                                    setSearchTerm('');
+                                    setStatusFilter("all");
+                                    setDateFilter("all");
+                                    setSearchTerm("");
                                 }}
                                 className="text-xs">
                                 Clear all
@@ -400,13 +500,16 @@ const Order = () => {
                             <NotFound message="No orders found matching your criteria." />
                         </div>
                     ) : (
-                        <OrderTable data={orders?.data} handleAction={handleAction} />
+                        <OrderTable
+                            data={orders?.data}
+                            handleAction={handleAction}
+                        />
                     )}
                 </CardContent>
             </Card>
 
             {/* Pagination */}
-            {orders?.meta?.total > itemsPerPage && (
+            {orders?.meta?.total > 1 && (
                 <div className="mt-8">
                     <Pagination
                         currentPage={currentPage}
@@ -419,16 +522,21 @@ const Order = () => {
             )}
 
             {/* Order Details Modal */}
-            <OrderDetailsModal isOpen={isViewModalOpen} onClose={() => setIsViewModalOpen(false)} order={currentOrder} />
+            <OrderDetailsModal
+                isOpen={isViewModalOpen}
+                onClose={() => setIsViewModalOpen(false)}
+                order={currentOrder}
+            />
 
             {/* Confirmation Modal */}
             <ConfirmationModal
                 dialogOpen={isConfirmModalOpen}
                 setDialogOpen={setIsConfirmModalOpen}
                 dialogAction={{
-                    title: confirmAction?.title || '',
-                    description: confirmAction?.description || '',
-                    type: confirmAction?.type === 'delete' ? 'delete' : 'default',
+                    title: confirmAction?.title || "",
+                    description: confirmAction?.description || "",
+                    type:
+                        confirmAction?.type === "delete" ? "delete" : "default",
                 }}
                 handleConfirmAction={handleConfirmAction}
             />
