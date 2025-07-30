@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import express from 'express';
 import { upload } from '../../../helpers/upload';
 import { validateRequest } from '../../middleware/validateRequest';
@@ -9,7 +10,7 @@ const router = express.Router();
 // Create review (public route)
 router.post(
    '/create',
-   upload.fields([{ name: 'images', maxCount: 10 }]),
+   upload.fields([{ name: 'images', maxCount: 10 }]) as any,
    validateRequest(ReviewValidation.createReviewZodSchema),
    ReviewController.createReview
 );

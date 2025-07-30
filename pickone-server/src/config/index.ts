@@ -9,7 +9,7 @@ export default {
    database_url: process.env.DATABASE_URL,
    bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
    jwt: {
-      secret_token: process.env.JWT_SECKRET_TOKEN,
+      secret_token: process.env.JWT_SECRET_TOKEN,
       secret_expires: process.env.JWT_EXPIRE_IN,
       refresh_token: process.env.JWT_REFRESH_TOKEN,
       refresh_expires: process.env.JWT_REFRESH_EXPIRE_IN,

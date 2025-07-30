@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import express from 'express';
 import { upload } from '../../../helpers/upload';
 import { validateRequest } from '../../middleware/validateRequest';
@@ -8,7 +9,7 @@ const router = express.Router();
 
 router.post(
    '/create',
-   upload.any(),
+   upload.any() as any ,
    validateRequest(ProductValidation.createProductSchema),
    ProductController.createProduct
 );
@@ -26,13 +27,13 @@ router.patch(
 
 router.patch(
    '/thumbnail/:id',
-   upload.single('thumbnail'),
+   upload.single('thumbnail') as any,
    ProductController.updateThumbnail
 );
 
 router.patch(
    '/images/:id',
-   upload.fields([{ name: 'images', maxCount: 20 }]),
+   upload.fields([{ name: 'images', maxCount: 20 }]) as any,
    ProductController.updateProductImages
 );
 
@@ -42,12 +43,12 @@ router.delete('/:id', ProductController.deleteProduct);
 
 router.post(
    '/description-block',
-   upload.single('image'),
+   upload.single('image') as any,
    ProductController.addDescriptionBlock
 );
 router.patch(
    '/description-block',
-   upload.single('image'),
+   upload.single('image') as any,
    ProductController.updateDescriptionBlock
 );
 router.delete(

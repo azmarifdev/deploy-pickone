@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import express from 'express';
 import { USER_ROLE } from '../../../enums/user';
 import { upload } from '../../../helpers/upload';
@@ -18,7 +19,7 @@ router.get('/', auth(USER_ROLE.ADMIN), UserController.getAllUsers);
 router.get('/me', auth(USER_ROLE.ADMIN), UserController.userProfile);
 router.patch(
    '/',
-   upload.single('image'),
+   upload.single('image') as any,
    auth(USER_ROLE.ADMIN),
    UserController.updateUser
 );
