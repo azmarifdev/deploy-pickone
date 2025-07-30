@@ -147,7 +147,7 @@ nano pickone-admin/.env
 
 Add:
 ```env
-NEXT_PUBLIC_API_URL=http://103.213.38.213/api
+NEXT_PUBLIC_BASE_URL=http://103.213.38.213/api
 NEXTAUTH_SECRET=your_nextauth_secret_here
 NEXTAUTH_URL=http://103.213.38.213/admin
 ```
@@ -159,7 +159,7 @@ nano pickone-client/.env
 
 Add:
 ```env
-NEXT_PUBLIC_API_URL=http://103.213.38.213/api
+NEXT_PUBLIC_BASE_URL=http://103.213.38.213/api
 NEXT_PUBLIC_FRONTEND_URL=http://103.213.38.213
 ```
 

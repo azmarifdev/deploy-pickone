@@ -27,11 +27,11 @@ const baseQueryWithErrorHandling: BaseQueryFn<
     FetchBaseQueryError | ErrorResponse,
     {},
     FetchBaseQueryMeta
-> = async (args:any, api:any, extraOptions:any  ) => {
+> = async (args: any, api: any, extraOptions: any) => {
     const baseQuery = fetchBaseQuery({
         // baseUrl:"../",
         // baseUrl: process.env.NEXT_PUBLIC_API_KEY || "http://localhost:5000",
-        baseUrl: process.env.NEXT_PUBLIC_API_KEY || "http://localhost:5000",
+        baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
         credentials: "include",
     });
 
