@@ -27,7 +27,8 @@ services:
       - ./pickone-server:/app
       - /app/node_modules
       - /app/dist
-      - static-flles:/tmp
+      - static-files:/tmp
+      - uploaded-files:/app/uploads
     env_file:
       - .env
     networks:
@@ -73,6 +74,7 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - static-files:/var/www/uploads
     depends_on:
       - pickone-backend
       - pickone-client
@@ -84,6 +86,10 @@ services:
 # volumes and networks 
 volumes:
   mongo-data:
+    driver: local
+  static-files:
+    driver: local
+  uploaded-files:
     driver: local
 
 networks:
