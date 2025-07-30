@@ -1,0 +1,12 @@
+{
+  "editor.tabSize": 3,
+  "prettier.tabWidth": 3,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+      "source.fixAll.tslint": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "cSpell.words": [
+      "pickone"
+    ]
+}

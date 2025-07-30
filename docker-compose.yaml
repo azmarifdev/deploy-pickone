@@ -1,0 +1,90 @@
+services:
+
+  pickone-client:
+    container_name: pickone-client
+    build:
+      context: ./pickone-client
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./pickone-client:/client
+      - /client/node_modules
+      - /client/.next
+    networks:
+      - pickone-network
+    depends_on:
+      - pickone-backend
+
+  pickone-backend:
+    container_name: pickone-backend
+    build:
+      context: ./pickone-server
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./pickone-server:/app
+      - /app/node_modules
+      - /app/dist
+    env_file:
+      - .env
+    networks:
+      - pickone-network
+# admin service
+  pickone-admin:
+    container_name: pickone-admin
+    build:
+      context: ./pickone-admin
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./pickone-admin:/src
+      - /src/node_modules
+      - /src/.next
+    networks:
+      - pickone-network
+    depends_on:
+      - pickone-backend
+    
+
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - pickone-network
+    
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
+      - MONGO_INITDB_DATABASE=${DB_NAME}
+    restart: always
+  
+
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - pickone-backend
+      - pickone-client
+      - pickone-admin
+    networks:
+      - pickone-network
+    restart: always
+
+# volumes and networks 
+volumes:
+  mongo-data:
+    driver: local
+
+networks:
+  pickone-network:
+    driver: bridge
