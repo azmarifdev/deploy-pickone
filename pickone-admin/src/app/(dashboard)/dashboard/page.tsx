@@ -535,7 +535,7 @@ const Dashboard = () => {
                     </div>
 
                     {/* Recent Activity */}
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                    {/* <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">
                             Recent Activity
                         </h3>
@@ -580,7 +580,7 @@ const Dashboard = () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* System Health */}
                     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
