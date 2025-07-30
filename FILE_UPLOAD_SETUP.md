@@ -9,6 +9,7 @@ The PickOne project uses Docker volumes to handle file uploads and storage acros
 Files are stored in the following structure within the container:
 ```
 /tmp/
+├── user/               # User profile images
 ├── products/           # Product images (thumbnails and gallery)
 ├── description-blocks/ # Product description images
 └── reviews/           # Review images
@@ -43,6 +44,7 @@ Files are stored in the following structure within the container:
 Files are accessible via: `http://your-domain/tmp/[category]/[filename]`
 
 Examples:
+- `http://localhost/tmp/user/abc123-profile.jpg`
 - `http://localhost/tmp/products/abc123-product-image.jpg`
 - `http://localhost/tmp/description-blocks/def456-description.png`
 
