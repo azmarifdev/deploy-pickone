@@ -1,51 +1,38 @@
-import { CookieOptions, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import {
+   cookieConfig,
+   cookieNames,
+   getClearCookieOptions,
+} from '../../../config/cookie';
 import { catchAsync } from '../../../shared/catchAsync';
 import { sendResponse } from '../../../shared/sendResponse';
 import { IRefreshToken } from './auth.interface';
 import { AuthServices } from './auth.services';
-
-const isProduction = process.env.NODE_ENV === 'production';
 
 const loginUser = catchAsync(async (req: Request, res: Response) => {
    const { ...loginData } = req.body;
 
    const result = await AuthServices.loginUser(loginData);
 
-   const refreshCookieOptions: CookieOptions = {
-      path: '/',
-      secure: isProduction,
-      httpOnly: true,
-      sameSite: isProduction ? 'none' : 'lax',
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-   };
-
-   const accessCookieOptions: CookieOptions = {
-      path: '/',
-      secure: isProduction,
-      httpOnly: true,
-      sameSite: isProduction ? 'none' : 'lax',
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-   };
-
-   // Set cookies
+   // Set cookies using centralized configuration
    if (result?.refreshToken) {
       res.cookie(
-         'pickone_refresh_token',
+         cookieNames.REFRESH_TOKEN,
          result.refreshToken,
-         refreshCookieOptions
+         cookieConfig.refreshToken
       );
    }
 
    if (result?.accessToken) {
       res.cookie(
-         'pickone_access_token',
+         cookieNames.ACCESS_TOKEN,
          result.accessToken,
-         accessCookieOptions
+         cookieConfig.accessToken
       );
    }
 
-   sendResponse<any>(res, {
+   sendResponse(res, {
       statusCode: StatusCodes.OK,
       success: true,
       message: 'User logged successfully..!!',
@@ -54,44 +41,46 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 const refreshToken = catchAsync(async (req: Request, res: Response) => {
-   const { refreshToken } = req.cookies;
+   // Extract refresh token from cookies
+   const refreshTokenFromCookie = req.cookies[cookieNames.REFRESH_TOKEN];
 
-   const result = await AuthServices.refreshToken(refreshToken);
+   if (!refreshTokenFromCookie) {
+      return sendResponse(res, {
+         statusCode: StatusCodes.UNAUTHORIZED,
+         success: false,
+         message: 'Refresh token is missing',
+      });
+   }
 
-   // Clear the old refresh token and access token
-   res.clearCookie('pickone_refresh_token');
-   res.clearCookie('pickone_access_token');
+   const result = await AuthServices.refreshToken(refreshTokenFromCookie);
 
-   const refreshCookieOptions = {
-      path: '/',
-      secure: isProduction, // Use true only in production (HTTPS)
-      httpOnly: true, // Keep it true for security
-      sameSite: isProduction ? 'none' : ('lax' as 'none' | 'lax'), // Explicitly cast to valid type
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-   };
-
-   const accessCookieOptions = {
-      path: '/',
-      secure: isProduction, // Use true only in production (HTTPS)
-      httpOnly: true, // Keep it true for security
-      sameSite: isProduction ? 'none' : ('lax' as 'none' | 'lax'), // Explicitly cast to valid type
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-   };
-
-   // Set the new refresh token in the cookie
-   res.cookie(
-      'pickone_refresh_token',
-      result?.refreshToken,
-      refreshCookieOptions
+   // Clear the old cookies with proper options
+   res.clearCookie(
+      cookieNames.REFRESH_TOKEN,
+      getClearCookieOptions(cookieConfig.refreshToken)
+   );
+   res.clearCookie(
+      cookieNames.ACCESS_TOKEN,
+      getClearCookieOptions(cookieConfig.accessToken)
    );
 
-   // Set the new access token in the cookie
-   res.cookie('pickone_access_token', result?.accessToken, accessCookieOptions);
+   // Set the new tokens
+   res.cookie(
+      cookieNames.REFRESH_TOKEN,
+      result?.refreshToken,
+      cookieConfig.refreshToken
+   );
+
+   res.cookie(
+      cookieNames.ACCESS_TOKEN,
+      result?.accessToken,
+      cookieConfig.accessToken
+   );
 
    sendResponse<IRefreshToken>(res, {
       statusCode: StatusCodes.OK,
       success: true,
-      message: 'User logged successfully..!!',
+      message: 'Token refreshed successfully..!!',
       data: result,
    });
 });
@@ -110,9 +99,15 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 });
 
 const logoutUser = catchAsync(async (req: Request, res: Response) => {
-   // Clear the cookies
-   res.clearCookie('pickone_refresh_token');
-   res.clearCookie('pickone_access_token');
+   // Clear the cookies with proper options
+   res.clearCookie(
+      cookieNames.REFRESH_TOKEN,
+      getClearCookieOptions(cookieConfig.refreshToken)
+   );
+   res.clearCookie(
+      cookieNames.ACCESS_TOKEN,
+      getClearCookieOptions(cookieConfig.accessToken)
+   );
 
    sendResponse(res, {
       statusCode: StatusCodes.OK,

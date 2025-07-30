@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { Secret } from 'jsonwebtoken';
 import config from '../../config';
+import { cookieNames } from '../../config/cookie';
 import ApiError from '../../errors/ApiError';
 import { jwtHelpers } from '../../helpers/jwtHelpers';
 import { sendResponse } from '../../shared/sendResponse';
@@ -10,9 +11,9 @@ const auth =
    (...requiredRoles: string[]) =>
    async (req: Request, res: Response, next: NextFunction) => {
       try {
-         // Get the access token from cookies or headers barear token
+         // Get the access token from cookies or headers bearer token
          const token =
-            req.cookies['pickone_access_token'] ||
+            req.cookies[cookieNames.ACCESS_TOKEN] ||
             req.headers?.authorization?.split(' ')[1];
 
          if (!token) {
@@ -31,6 +32,7 @@ const auth =
                config.jwt.secret_token as Secret
             );
          } catch (error) {
+            console.log(error);
             throw new ApiError(
                StatusCodes.UNAUTHORIZED,
                'You are not authorized'

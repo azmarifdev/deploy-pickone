@@ -1,3 +1,6 @@
+import { Request } from 'express';
+import { CorsOptions } from 'cors';
+
 const origins = [
    'http://localhost:3000',
    'http://localhost:3001',
@@ -13,18 +16,35 @@ const origins = [
    'http://103.213.38.213:80',
 ];
 
-export const corsOptionsDelegate = function (req: any, callback: any) {
+export const corsOptionsDelegate = function (
+   req: Request,
+   callback: (err: Error | null, options?: CorsOptions) => void
+) {
    const origin = req.header('Origin');
-   let corsOptions;
-   if (origins.some(allowedOrigin => origin?.startsWith(allowedOrigin))) {
+   let corsOptions: CorsOptions;
+
+   // Allow requests without origin (like mobile apps, Postman, etc.)
+   if (!origin) {
       corsOptions = {
-         origin,
+         origin: true,
          credentials: true,
          methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
          allowedHeaders: ['Content-Type', 'Authorization'],
          exposedHeaders: ['Content-Disposition'],
       };
-   } else corsOptions = { origin: false };
+   } else if (
+      origins.some(allowedOrigin => origin?.startsWith(allowedOrigin))
+   ) {
+      corsOptions = {
+         origin: true,
+         credentials: true,
+         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+         allowedHeaders: ['Content-Type', 'Authorization'],
+         exposedHeaders: ['Content-Disposition'],
+      };
+   } else {
+      corsOptions = { origin: false, credentials: false };
+   }
 
    callback(null, corsOptions);
 };
