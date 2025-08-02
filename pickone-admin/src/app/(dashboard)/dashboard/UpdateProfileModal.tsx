@@ -1,12 +1,12 @@
-"use client";
-import {useState, useEffect} from "react";
-import type React from "react";
+'use client';
+import { useState, useEffect } from 'react';
+import type React from 'react';
 
-import {useForm} from "react-hook-form";
-import {FaTimes, FaCamera, FaTrash, FaUser} from "react-icons/fa";
-import Image from "next/image";
-import {useUpdateUserMutation} from "@/redux/api/authApi";
-import toast from "react-hot-toast";
+import { useForm } from 'react-hook-form';
+import { FaTimes, FaCamera, FaTrash, FaUser } from 'react-icons/fa';
+import Image from 'next/image';
+import { useUpdateUserMutation } from '@/redux/api/authApi';
+import toast from 'react-hot-toast';
 
 interface UpdateProfileModalProps {
     isOpen: boolean;
@@ -24,20 +24,14 @@ interface FormValues {
     email: string;
 }
 
-const UpdateProfileModal = ({
-    isOpen,
-    setIsOpen,
-    userData,
-}: UpdateProfileModalProps) => {
-    const [profileImage, setProfileImage] = useState<string | null>(
-        userData.profile_image
-    );
+const UpdateProfileModal = ({ isOpen, setIsOpen, userData }: UpdateProfileModalProps) => {
+    const [profileImage, setProfileImage] = useState<string | null>(userData.profile_image);
     const [imageFile, setImageFile] = useState<File | null>(null);
 
     const {
         register,
         handleSubmit,
-        formState: {errors},
+        formState: { errors },
         reset,
     } = useForm<FormValues>({
         defaultValues: {
@@ -78,22 +72,40 @@ const UpdateProfileModal = ({
         true;
     };
 
-    const [updateUser, {isLoading}] = useUpdateUserMutation();
+    const [updateUser, { isLoading }] = useUpdateUserMutation();
     const onSubmit = async (data: FormValues) => {
-        // Combine form data with image information
-        const formData = new FormData();
-        formData.append("name", data.name || userData.name);
-        formData.append("email", data.email || userData.email);
-        if (imageFile) {
-            formData.append("image", imageFile);
-        }
+        try {
+            // Combine form data with image information
+            const formData = new FormData();
+            formData.append('name', data.name || userData.name);
+            formData.append('email', data.email || userData.email);
+            if (imageFile) {
+                formData.append('image', imageFile);
+            }
 
-        const res: any = await updateUser(formData);
-        if (res.data?.success) {
-            toast.success("Profile updated successfully");
-            setIsOpen(false);
-        } else {
-            toast.error(res.error?.message);
+            console.log('Submitting profile update:', {
+                name: data.name || userData.name,
+                email: data.email || userData.email,
+                hasImage: !!imageFile,
+            });
+
+            const res: any = await updateUser(formData);
+
+            console.log('Update response:', res);
+
+            if (res.data?.success) {
+                toast.success('Profile updated successfully');
+                setIsOpen(false);
+            } else {
+                // Better error handling
+                const errorMessage =
+                    res.error?.data?.message || res.error?.message || 'Failed to update profile. Please try again.';
+                toast.error(errorMessage);
+                console.error('Profile update error:', res.error);
+            }
+        } catch (error) {
+            console.error('Profile update catch error:', error);
+            toast.error('An unexpected error occurred. Please try again.');
         }
     };
 
@@ -106,12 +118,8 @@ const UpdateProfileModal = ({
                 onClick={(e) => e.stopPropagation()}>
                 {/* Header */}
                 <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
-                    <h3 className="text-xl font-bold text-white">
-                        Update Profile
-                    </h3>
-                    <button
-                        onClick={() => setIsOpen(false)}
-                        className="text-white hover:text-gray-200 transition-colors">
+                    <h3 className="text-xl font-bold text-white">Update Profile</h3>
+                    <button onClick={() => setIsOpen(false)} className="text-white hover:text-gray-200 transition-colors">
                         <FaTimes className="w-5 h-5" />
                     </button>
                 </div>
@@ -125,10 +133,7 @@ const UpdateProfileModal = ({
                                 {profileImage ? (
                                     <div className="relative">
                                         <Image
-                                            src={
-                                                profileImage ||
-                                                "/placeholder.svg"
-                                            }
+                                            src={profileImage || '/placeholder.svg'}
                                             alt="Profile Preview"
                                             width={100}
                                             height={100}
@@ -150,71 +155,47 @@ const UpdateProfileModal = ({
 
                             <label className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors">
                                 <FaCamera className="w-4 h-4" />
-                                <span className="text-sm font-medium">
-                                    Upload Image
-                                </span>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageChange}
-                                    className="hidden"
-                                />
+                                <span className="text-sm font-medium">Upload Image</span>
+                                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                             </label>
                         </div>
 
                         {/* Name Field */}
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Full Name
-                            </label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                             <input
                                 type="text"
-                                {...register("name", {
-                                    required: "Name is required",
+                                {...register('name', {
+                                    required: 'Name is required',
                                     minLength: {
                                         value: 2,
-                                        message:
-                                            "Name must be at least 2 characters",
+                                        message: 'Name must be at least 2 characters',
                                     },
                                 })}
                                 className={`w-full px-4 py-2 border ${
-                                    errors.name
-                                        ? "border-red-500"
-                                        : "border-gray-300"
+                                    errors.name ? 'border-red-500' : 'border-gray-300'
                                 } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             />
-                            {errors.name && (
-                                <p className="mt-1 text-sm text-red-500">
-                                    {errors.name.message}
-                                </p>
-                            )}
+                            {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
                         </div>
 
                         {/* Email Field */}
                         <div className="mb-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Email Address
-                            </label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
                             <input
                                 type="email"
-                                {...register("email", {
-                                    required: "Email is required",
+                                {...register('email', {
+                                    required: 'Email is required',
                                     pattern: {
                                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                        message: "Invalid email address",
+                                        message: 'Invalid email address',
                                     },
                                 })}
                                 className={`w-full px-4 py-2 border ${
-                                    errors.email
-                                        ? "border-red-500"
-                                        : "border-gray-300"
+                                    errors.email ? 'border-red-500' : 'border-gray-300'
                                 } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             />
-                            {errors.email && (
-                                <p className="mt-1 text-sm text-red-500">
-                                    {errors.email.message}
-                                </p>
-                            )}
+                            {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
                         </div>
 
                         {/* Action Buttons */}
@@ -223,7 +204,7 @@ const UpdateProfileModal = ({
                                 type="submit"
                                 disabled={isLoading}
                                 className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 transition-colors">
-                                {isLoading ? "Updating..." : "Update Profile"}
+                                {isLoading ? 'Updating...' : 'Update Profile'}
                             </button>
                             <button
                                 type="button"

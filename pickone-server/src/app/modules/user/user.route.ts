@@ -20,6 +20,7 @@ router.get('/me', auth(USER_ROLE.ADMIN), UserController.userProfile);
 router.patch(
    '/',
    upload.single('image') as any,
+   validateRequest(UserValidation.updateUserZodSchema),
    auth(USER_ROLE.ADMIN),
    UserController.updateUser
 );

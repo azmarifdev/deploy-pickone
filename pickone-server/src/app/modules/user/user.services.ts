@@ -24,38 +24,68 @@ const userProfile = async (email: string): Promise<IUser | null> => {
 const updateUser = async (
    email: string,
    payload: IUser,
-   image: any
+   image: Express.Multer.File | undefined
 ): Promise<IUser | null> => {
-   console.log(email, payload, image);
+   console.log('updateUser called with:', {
+      email,
+      payload,
+      hasImage: !!image,
+   });
+
    const isUserExist = await User.findOne({ email });
 
    if (!isUserExist) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
    }
+
    const { ...userData } = payload;
 
+   // Handle image upload
    if (image) {
-      const uploadImage = await ImageUploadService.uploadSingleFile(
-         image,
-         'user'
-      );
-      userData.profile_image = uploadImage;
-      if (isUserExist.profile_image) {
-         await ImageUploadService.deleteSingleFile(isUserExist.profile_image);
+      try {
+         const uploadImage = await ImageUploadService.uploadSingleFile(
+            image,
+            'user'
+         );
+         userData.profile_image = uploadImage;
+
+         // Delete old image if exists
+         if (isUserExist.profile_image) {
+            await ImageUploadService.deleteSingleFile(
+               isUserExist.profile_image
+            );
+         }
+      } catch (error) {
+         console.error('Image upload error:', error);
+         throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to upload image');
       }
    }
+
+   // If updating email, check if it's different and not already taken
+   if (userData.email && userData.email !== email) {
+      const emailExists = await User.findOne({ email: userData.email });
+      if (emailExists) {
+         throw new ApiError(StatusCodes.CONFLICT, 'Email already exists');
+      }
+   }
+
    const formattedUserData = {
       name: userData.name || isUserExist.name,
       email: userData.email || isUserExist.email,
       profile_image: userData.profile_image || isUserExist.profile_image,
    };
+
+   console.log('Updating user with data:', formattedUserData);
+
    const updatedUser = await User.findOneAndUpdate(
       { email },
       formattedUserData,
       {
          new: true,
       }
-   );
+   ).select('-password');
+
+   console.log('User updated successfully:', updatedUser);
    return updatedUser;
 };
 

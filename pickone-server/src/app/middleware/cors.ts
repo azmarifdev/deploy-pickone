@@ -14,6 +14,12 @@ const origins = [
    'http://103.213.38.213:4000',
    'http://103.213.38.213:5000',
    'http://103.213.38.213:80',
+   'https://admin.azmarif.dev',
+   'https://client.azmarif.dev',
+   'https://server.pickone.dev',
+   'https://admin.ekhonikinbo.com',
+   'https://client.ekhonikinbo.com',
+   'https://server.ekhonikinbo.com',
 ];
 
 export const corsOptionsDelegate = function (
